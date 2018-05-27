@@ -19,17 +19,30 @@ uint16 ->  -255~255
 
 
 contract Test {
-    uint public _a;
+    uint8 public _a;
 
-    function Test(uint a) {
+    function Test(uint8 a) {
         _a = a;
     }
 
-    function a() constant public returns (uint) {
+    function a() constant public returns (uint8) {
         return _a;
     }
 
-    function setA(uint a) {
+    function setA(uint8 a) {
         _a = a;
     }
+
+
+
 }
+
+
+/*
+超过多少位，就会溢出，就是最大值
+uint8 和 uint16之间可以隐式转换的
+
+
+
+
+ */

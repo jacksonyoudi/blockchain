@@ -12,8 +12,9 @@ contract Test {
 
     function testVar1() constant public returns (uint) {
         uint a;
-        for (var i=0;i<=255; i++) {
-            a = i;
+        // var i = 0; uint8 数值会溢出
+        for (var i=0;i<255; i++) {
+            a=i;
         }
         return a;
     }
