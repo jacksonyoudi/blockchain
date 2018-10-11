@@ -1,21 +1,112 @@
 package main
 
-import "os"
+import (
+	"github.com/boltdb/bolt"
+	"os"
+)
+
+const dbfile  = "blockchain.db"
+const blockBucket  = "block_demo"
+var lastHash  = ""
 
 type BlockChian struct {
-	blocks []*Block
+	//blocks []*Block
+	db *bolt.DB
+	lastHash []byte
 }
 
 func NewBlockChain() *BlockChian {
-	return &BlockChian{[]*Block{NewGenesisBlock()}}
+	//return &Blo ckChian{[]*Block{NewGenesisBlock()}}
+	//func Open(path string, mode os.FileMode, options *Options) (*DB, error) {
+	//	var db = &DB{opened: true}
+
+	db, err := bolt.Open(dbfile, 777, nil)
+	CheckErr(err)
+	var lasthash []byte
+	//db.View()
+	db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+
+		if bucket != nil {
+			//读取lasthash
+			lasthash = bucket.Get([]byte(lastHash))
+		} else {
+			// 1.创建bucket
+			// 2. 创世区块
+			genesis := NewGenesisBlock()
+			bucket, err := tx.CreateBucket([]byte(blockBucket))
+			CheckErr(err)
+
+			err = bucket.Put(genesis.Hash, genesis.Serialize())
+			CheckErr(err)
+			lasthash = genesis.Hash
+			err = bucket.Put([]byte(lasthash), genesis.Hash)
+			CheckErr(err)
+		}
+		return nil
+	})
+
+	return &BlockChian{db:db, lastHash:lasthash}
+
 }
 
 
 func (bc *BlockChian)AddBlock(data string) {
-	if len(bc.blocks) <= 0 {
-		os.Exit(1)
-	}
-	lastBlock := bc.blocks[len(bc.blocks) -1]
-	block := NewBlock(data, lastBlock.Hash)
-	bc.blocks = append(bc.blocks, block)
+	var prevBlockHash  []byte
+	err := bc.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		lasthash := bucket.Get([]byte(lastHash))
+		prevBlockHash = lasthash
+		return nil
+	})
+
+	block := NewBlock(data, prevBlockHash)
+
+	err = bc.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		err = bucket.Put(block.Hash, block.Serialize())
+		CheckErr(err)
+
+		err = bucket.Put([]byte(lastHash), block.Hash)
+		CheckErr(err)
+		return nil
+	})
+
+	CheckErr(err)
+}
+
+type BlockChainIterator struct {
+	db *bolt.DB
+	currentHash []byte
+}
+
+
+func (bc *BlockChian)Iterator() *BlockChainIterator {
+	return &BlockChainIterator{bc.db, bc.lastHash}
+}
+
+func (it *BlockChainIterator)Next() *Block  {
+	var block *Block
+
+
+	err := it.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(blockBucket))
+		if bucket == nil {
+			os.Exit(1)
+		}
+
+		blockTmp := bucket.Get(it.currentHash)
+		block = Deserialize(blockTmp)
+
+		it.currentHash = block.PrevBlockHash
+		return nil
+
+	})
+
+	CheckErr(err)
+	return block
+
+
+
+
 }

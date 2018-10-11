@@ -1,29 +1,60 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
+	"fmt"
+	"os"
 	"time"
 )
 
 type Block struct {
-	Version int64
+	Version       int64
 	PrevBlockHash []byte
-	Hash []byte
-	TimeStamp int64
-	TargetBits int64
-	Nonce int64
-	MerkeRoot []byte
-	Data []byte
+	Hash          []byte
+	TimeStamp     int64
+	TargetBits    int64
+	Nonce         int64
+	MerkeRoot     []byte
+	Data          []byte
 }
 
-func NewBlock(data string, prevBlockHash []byte)  *Block{
-	block :=  &Block{
-		Version:1,
-		PrevBlockHash:prevBlockHash,
-		TimeStamp:time.Now().Unix(),
-		TargetBits: targetBits,
-		Nonce: 0,
-		MerkeRoot: []byte{},
-		Data: []byte(data)}
+func (block *Block) Serialize() []byte {
+	var buffer bytes.Buffer
+
+	encoder := gob.NewEncoder(&buffer)
+
+	err := encoder.Encode(block)
+
+	CheckErr(err)
+	return buffer.Bytes()
+}
+
+func Deserialize(data []byte) *Block {
+	if len(data) == 0 {
+		fmt.Println("data is empty!")
+		os.Exit(1)
+	}
+
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+
+	var block Block
+	err := decoder.Decode(&block)
+	CheckErr(err)
+
+	return &block
+
+}
+
+func NewBlock(data string, prevBlockHash []byte) *Block {
+	block := &Block{
+		Version:       1,
+		PrevBlockHash: prevBlockHash,
+		TimeStamp:     time.Now().Unix(),
+		TargetBits:    targetBits,
+		Nonce:         0,
+		MerkeRoot:     []byte{},
+		Data:          []byte(data)}
 	//block.SetHash()
 	pow := NewProofOfWork(block)
 	nonce, hash := pow.Run()
@@ -48,8 +79,6 @@ func (block *Block)SetHash()  {
 	block.Hash = hash[:]
 }
 */
-
-
 
 func NewGenesisBlock() *Block {
 	return NewBlock("Genesis Block!", []byte{})
