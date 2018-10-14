@@ -38,8 +38,9 @@ func (pow *ProofOfWork)PrepareRawData(nonce int64)[]byte  {
 		Int2Byte(block.TimeStamp),
 		block.MerkeRoot,
 		Int2Byte(nonce),
-		Int2Byte(targetBits),
-		block.Data}
+		Int2Byte(targetBits)}
+		//block.Data}
+		//block.Transactions} //TODO
 
 	data := bytes.Join(tmp, []byte{})
 	return data

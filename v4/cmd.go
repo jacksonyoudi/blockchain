@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func (cli *CLI)AddBlock(data string)  {
-	cli.bc.AddBlock(data)
+	//cli.AddBlock(data)
 }
 
 func (cli *CLI)CreateChain(addr string) {
@@ -15,13 +15,13 @@ func (cli *CLI)CreateChain(addr string) {
 
 
 func (cli *CLI)PrintChain()  {
-	bc := cli.bc
+	bc := GetBlockChain()
 	it := bc.Iterator()
 	for {
 		// 取回当前hash指定的block，并且将当前的hash指向上一个区块的hash
 		block := it.Next()
 
-		fmt.Println("data:", string(block.Data))
+		fmt.Printf("transaction %v\n:", block.Transactions)
 		fmt.Println("Version:", block.Version)
 		fmt.Printf("Hash:%x\n", block.Hash)
 		fmt.Printf("TimeStamp:%d\n", block.TimeStamp)
@@ -39,4 +39,16 @@ func (cli *CLI)PrintChain()  {
 
 
 	}
+}
+
+func (cli *CLI)GetBalanece(address string)  {
+	bc := GetBlockChain()
+	defer bc.db.Close()
+
+	var total float64
+	utxos := bc.FindUTXOs(address)
+	for _, utxo := range utxos {
+		total += utxo.Value
+	}
+	fmt.Printf("The balance of '%s' is %f", total)
 }

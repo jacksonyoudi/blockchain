@@ -16,7 +16,8 @@ type Block struct {
 	TargetBits    int64
 	Nonce         int64
 	MerkeRoot     []byte
-	Data          []byte
+	//Data          []byte
+	Transactions []*Transaction
 }
 
 func (block *Block) Serialize() []byte {
@@ -46,7 +47,7 @@ func Deserialize(data []byte) *Block {
 
 }
 
-func NewBlock(data string, prevBlockHash []byte) *Block {
+func NewBlock(transactions []*Transaction, prevBlockHash []byte) *Block {
 	block := &Block{
 		Version:       1,
 		PrevBlockHash: prevBlockHash,
@@ -54,32 +55,34 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		TargetBits:    targetBits,
 		Nonce:         0,
 		MerkeRoot:     []byte{},
-		Data:          []byte(data)}
-	//block.SetHash()
-	pow := NewProofOfWork(block)
-	nonce, hash := pow.Run()
-	block.Nonce = nonce
-	block.Hash = hash
-	return block
+		//Data:          []byte(data)}
+		Transactions: transactions}
+		//block.SetHash()
 
-}
+		pow := NewProofOfWork(block)
+		nonce, hash := pow.Run()
+		block.Nonce = nonce
+		block.Hash = hash
+		return block
+	}
 
-// int -> byte
-/*
-func (block *Block)SetHash()  {
-	tmp := [][]byte{
-		Int2Byte(block.Version),
-		block.PrevBlockHash,
-		Int2Byte(block.TimeStamp),
-		block.MerkeRoot,
-		Int2Byte(block.Nonce),
-		block.Data}
-	data := bytes.Join(tmp, []byte{})
-	hash := sha256.Sum256(data)
-	block.Hash = hash[:]
-}
-*/
+	// int -> byte
+	/*
+	func (block *Block)SetHash()  {
+		tmp := [][]byte{
+			Int2Byte(block.Version),
+			block.PrevBlockHash,
+			Int2Byte(block.TimeStamp),
+			block.MerkeRoot,
+			Int2Byte(block.Nonce),
+			block.Data}
+		data := bytes.Join(tmp, []byte{})
+		hash := sha256.Sum256(data)
+		block.Hash = hash[:]
+	}
+	*/
 
-func NewGenesisBlock() *Block {
-	return NewBlock("Genesis Block!", []byte{})
+func NewGenesisBlock(coinbase *Transaction) *Block {
+	//return NewBlock("Genesis Block!", []byte{})
+	return NewBlock([]*Transaction{coinbase}, []byte{})
 }

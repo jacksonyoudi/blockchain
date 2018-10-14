@@ -35,3 +35,23 @@ func (tx *Transaction)SetTXID()  {
 	tx.TXID = hash[:]
 
 }
+
+
+func (input *Input)ConUnlockedByAddress(unlockdata string) bool {
+
+	return input.UnlockScript == unlockdata
+}
+
+func (output *Output)ConBeUnlockedByAddress(unlocked string) bool {
+	return  output.lockScript == unlocked
+}
+
+
+func (tx * Transaction)IsCoinbase() bool {
+	if len(tx.TXInputs) == 1 {
+		if tx.TXInputs[0].Txid == nil && tx.TXInputs[0].ReferOutputIndex == -1 {
+			return true
+		}
+	}
+	return false
+}
