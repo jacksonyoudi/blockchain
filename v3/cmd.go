@@ -14,12 +14,14 @@ func (cli *CLI)PrintChain()  {
 		// 取回当前hash指定的block，并且将当前的hash指向上一个区块的hash
 		block := it.Next()
 
-		fmt.Println("data", string(block.Data))
+		fmt.Println("data:", string(block.Data))
 		fmt.Println("Version:", block.Version)
 		fmt.Printf("Hash:%x\n", block.Hash)
 		fmt.Printf("TimeStamp:%d\n", block.TimeStamp)
 		fmt.Printf("MerkeRoot:%x\n", block.MerkeRoot)
 		fmt.Printf("Nonce:%d\n", block.Nonce)
+		fmt.Printf("preblock Hash:%x\n", block.PrevBlockHash)
+		println("  ")
 
 		pow := NewProofOfWork(block)
 		fmt.Println("Vaild:", pow.IsVaild())

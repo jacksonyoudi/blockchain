@@ -7,7 +7,7 @@ import (
 
 const dbfile  = "blockchain.db"
 const blockBucket  = "block_demo"
-var lastHash  = ""
+const lastHashKey  = "genesis"
 
 type BlockChian struct {
 	//blocks []*Block
@@ -20,7 +20,7 @@ func NewBlockChain() *BlockChian {
 	//func Open(path string, mode os.FileMode, options *Options) (*DB, error) {
 	//	var db = &DB{opened: true}
 
-	db, err := bolt.Open(dbfile, 777, nil)
+	db, err := bolt.Open(dbfile, 7777, nil)
 	CheckErr(err)
 	var lasthash []byte
 	//db.View()
@@ -29,7 +29,7 @@ func NewBlockChain() *BlockChian {
 
 		if bucket != nil {
 			//读取lasthash
-			lasthash = bucket.Get([]byte(lastHash))
+			lasthash = bucket.Get([]byte(lastHashKey))
 		} else {
 			// 1.创建bucket
 			// 2. 创世区块
@@ -40,7 +40,7 @@ func NewBlockChain() *BlockChian {
 			err = bucket.Put(genesis.Hash, genesis.Serialize())
 			CheckErr(err)
 			lasthash = genesis.Hash
-			err = bucket.Put([]byte(lasthash), genesis.Hash)
+			err = bucket.Put([]byte(lastHashKey), genesis.Hash)
 			CheckErr(err)
 		}
 		return nil
@@ -52,22 +52,23 @@ func NewBlockChain() *BlockChian {
 
 
 func (bc *BlockChian)AddBlock(data string) {
-	var prevBlockHash  []byte
-	err := bc.db.View(func(tx *bolt.Tx) error {
+	//var prevBlockHash  []byte
+	/*err := bc.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
-		lasthash := bucket.Get([]byte(lastHash))
+		lasthash := bucket.Get([]byte(lastHashKey))
 		prevBlockHash = lasthash
 		return nil
-	})
+	})*/
 
-	block := NewBlock(data, prevBlockHash)
 
-	err = bc.db.Update(func(tx *bolt.Tx) error {
+	block := NewBlock(data, bc.lastHash)
+
+	err := bc.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(blockBucket))
-		err = bucket.Put(block.Hash, block.Serialize())
+		err := bucket.Put(block.Hash, block.Serialize())
 		CheckErr(err)
 
-		err = bucket.Put([]byte(lastHash), block.Hash)
+		err = bucket.Put([]byte(lastHashKey), block.Hash)
 		CheckErr(err)
 		return nil
 	})
