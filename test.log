@@ -260,3 +260,7 @@ INFO [10-22|21:22:00.853] Transaction pool price threshold updated price=1800000
 INFO [10-22|21:22:00.853] Etherbase automatically configured       address=0xC0E14E7CA2DA79fF1b4339c0B76cdbaB302201Fc
 INFO [10-22|21:22:00.854] Commit new mining work                   number=2 uncles=0 txs=0 gas=0 fees=0 elapsed=107.104µs
 WARN [10-22|21:22:00.854] Block sealing failed                     err="waiting for transactions"
+INFO [10-22|22:58:50.824] Regenerated local transaction journal    transactions=0 accounts=0
+INFO [10-22|23:58:50.847] Regenerated local transaction journal    transactions=0 accounts=0
+INFO [10-23|08:10:21.481] Regenerated local transaction journal    transactions=0 accounts=0
+INFO [10-23|09:10:21.506] Regenerated local transaction journal    transactions=0 accounts=0
